@@ -1,0 +1,501 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+  - uuid: 19a2f6c2c86c4f1b9b135a1b9a0f3e41
+    name: Templates/Network devices
+  templates:
+  - uuid: fba0bfa693a34ce6b979fadd0fd3f4ef
+    template: SonicWall_SNMP_Interfaces_Zones_Health
+    name: SonicWall SNMP (Interfaces + Zones + Health)
+    groups:
+    - name: Templates/Network devices
+    tags:
+    - tag: vendor
+      value: sonicwall
+    macros:
+    - macro: '{$IFDISCOVERY_DELAY}'
+      value: 1h
+    - macro: '{$CPU_WARN}'
+      value: '80'
+    - macro: '{$CPU_CRIT}'
+      value: '95'
+    - macro: '{$RAM_WARN}'
+      value: '80'
+    - macro: '{$RAM_CRIT}'
+      value: '95'
+    - macro: '{$CONN_WARN_PCT}'
+      value: '70'
+    - macro: '{$CONN_CRIT_PCT}'
+      value: '90'
+    - macro: '{$DPISSL_WARN_PCT}'
+      value: '70'
+    - macro: '{$DPISSL_CRIT_PCT}'
+      value: '90'
+    items:
+    - uuid: a3f0bfaf3f4c4cd3b2df49a2f7f983d9
+      name: 'System: Uptime'
+      type: SNMP_AGENT
+      key: sonicwall.uptime
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      delay: 1m
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: system
+    - uuid: bd5e7b8c8f174f59b0500a1b5db3d0f2
+      name: 'System: Name'
+      type: SNMP_AGENT
+      key: sonicwall.sysName
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      delay: 6h
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: system
+    - uuid: 4450f2c73c57473b9f28f49747f6404c
+      name: 'System: Location'
+      type: SNMP_AGENT
+      key: sonicwall.sysLocation
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      delay: 12h
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: system
+    - uuid: 343f8ec5b7bd45afbc2c6749e5d3f2c0
+      name: 'System: Model'
+      type: SNMP_AGENT
+      key: sonicwall.model
+      snmp_oid: 1.3.6.1.4.1.8741.2.1.1.1.0
+      delay: 12h
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 6c1f934a0efe4b7f9e9ab6b3e7f74fd5
+      name: 'System: Serial Number'
+      type: SNMP_AGENT
+      key: sonicwall.serial
+      snmp_oid: 1.3.6.1.4.1.8741.2.1.1.2.0
+      delay: 12h
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 8e07a4a8f5d44e0db7d8a77b0c3de843
+      name: 'System: Firmware Version'
+      type: SNMP_AGENT
+      key: sonicwall.firmware
+      snmp_oid: 1.3.6.1.4.1.8741.2.1.1.3.0
+      delay: 12h
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1118f4c21a154f61afc76cc3dff93e7c
+      name: 'System: ROM Version'
+      type: SNMP_AGENT
+      key: sonicwall.rom
+      snmp_oid: 1.3.6.1.4.1.8741.2.1.1.4.0
+      delay: 12h
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9b4d7a2f927c4b9a9254de47d825f4f8
+      name: 'Health: CPU Utilization'
+      type: SNMP_AGENT
+      key: sonicwall.cpu.pct
+      snmp_oid: 1.3.6.1.4.1.8741.1.3.1.3.0
+      delay: 1m
+      value_type: UNSIGNED
+      units: '%'
+      tags:
+      - tag: component
+        value: health
+    - uuid: eb9d2f8b08c84a0ea7f16a46a8c0f2d9
+      name: 'Health: RAM Utilization'
+      type: SNMP_AGENT
+      key: sonicwall.ram.pct
+      snmp_oid: 1.3.6.1.4.1.8741.1.3.1.4.0
+      delay: 1m
+      value_type: UNSIGNED
+      units: '%'
+      tags:
+      - tag: component
+        value: health
+    - uuid: 5f94b3a814f44a2fbbdc839f0740d0ec
+      name: 'Connections: Max cache entries'
+      type: SNMP_AGENT
+      key: sonicwall.conn.max
+      snmp_oid: 1.3.6.1.4.1.8741.1.3.1.1.0
+      delay: 15m
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: connections
+    - uuid: 2f0d9bc2e4e344c5a0a55f116f7e525b
+      name: 'Connections: Current cache entries'
+      type: SNMP_AGENT
+      key: sonicwall.conn.cur
+      snmp_oid: 1.3.6.1.4.1.8741.1.3.1.2.0
+      delay: 1m
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: connections
+    - uuid: 49d5a83c14394f62a7b675a9d3bf1390
+      name: 'Connections: Cache utilization'
+      type: CALCULATED
+      key: sonicwall.conn.util.pct
+      delay: 1m
+      value_type: FLOAT
+      units: '%'
+      params: (100*last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.conn.cur)/(last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.conn.max)+(last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.conn.max)=0)))*(last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.conn.max)>0)
+      tags:
+      - tag: component
+        value: connections
+    - uuid: 2a146c854abd484196f6cbab344d4035
+      name: 'DPI-SSL: Conn count current'
+      type: SNMP_AGENT
+      key: sonicwall.dpisll.conn.cur
+      snmp_oid: 1.3.6.1.4.1.8741.1.3.5.1.0
+      delay: 1m
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: dpisll
+    - uuid: 7c9ae42e09714036a53c48d01377fd44
+      name: 'DPI-SSL: Conn count max'
+      type: SNMP_AGENT
+      key: sonicwall.dpisll.conn.max
+      snmp_oid: 1.3.6.1.4.1.8741.1.3.5.3.0
+      delay: 15m
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: dpisll
+    - uuid: d8c2f8b9e6f54b0c9f11b7af7d9832ab
+      name: 'DPI-SSL: Conn utilization'
+      type: CALCULATED
+      key: sonicwall.dpisll.conn.util.pct
+      delay: 1m
+      value_type: FLOAT
+      units: '%'
+      params: (100*last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.dpisll.conn.cur)/(last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.dpisll.conn.max)+(last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.dpisll.conn.max)=0)))*(last(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.dpisll.conn.max)>0)
+      tags:
+      - tag: component
+        value: dpisll
+    discovery_rules:
+    - uuid: b13e5f208ee54fda8f15e43c01c4f748
+      name: Interface discovery (ifDescr)
+      type: SNMP_AGENT
+      key: if.discovery
+      delay: '{$IFDISCOVERY_DELAY}'
+      lifetime: 30d
+      snmp_oid: discovery[{#IFDESCR},1.3.6.1.2.1.2.2.1.2]
+      item_prototypes:
+      - uuid: 66e2cfee0bf746a3a834baf0ef2d4e12
+        name: 'Interface {#IFDESCR}: Admin status'
+        type: SNMP_AGENT
+        key: if.admin[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.7.{#SNMPINDEX}
+        delay: 5m
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: interface
+          value: '{#IFDESCR}'
+      - uuid: 8d9c5312a0ab4c9aa49f9f145b933c57
+        name: 'Interface {#IFDESCR}: Oper status'
+        type: SNMP_AGENT
+        key: if.oper[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}
+        delay: 1m
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: interface
+          value: '{#IFDESCR}'
+      - uuid: 2ccf49ea0d4f4cd681807077aeae9923
+        name: 'Interface {#IFDESCR}: Speed'
+        type: SNMP_AGENT
+        key: if.speed.bps[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}
+        delay: 1h
+        value_type: UNSIGNED
+        units: bps
+        preprocessing:
+        - type: MULTIPLIER
+          parameters:
+          - '1000000'
+        tags:
+        - tag: component
+          value: interface
+        - tag: interface
+          value: '{#IFDESCR}'
+      - uuid: e2e9a9d678ca46c99a9048af7a8fa561
+        name: 'Interface {#IFDESCR}: Ingress throughput'
+        type: SNMP_AGENT
+        key: if.ingress.bps[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}
+        delay: 1m
+        value_type: UNSIGNED
+        units: bps
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        tags:
+        - tag: component
+          value: interface
+        - tag: direction
+          value: ingress
+        - tag: interface
+          value: '{#IFDESCR}'
+      - uuid: 9cfa8357b01d4e96a3efdb2c2c6e7fd2
+        name: 'Interface {#IFDESCR}: Egress throughput'
+        type: SNMP_AGENT
+        key: if.egress.bps[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}
+        delay: 1m
+        value_type: UNSIGNED
+        units: bps
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        tags:
+        - tag: component
+          value: interface
+        - tag: direction
+          value: egress
+        - tag: interface
+          value: '{#IFDESCR}'
+      - uuid: d37b3186f4d44d4392f2c3a215197f13
+        name: 'Interface {#IFDESCR}: Ingress utilization'
+        type: CALCULATED
+        key: if.ingress.util[{#SNMPINDEX}]
+        delay: 1m
+        value_type: FLOAT
+        units: '%'
+        params: (100*last(/SonicWall_SNMP_Interfaces_Zones_Health/if.ingress.bps[{#SNMPINDEX}])/(last(/SonicWall_SNMP_Interfaces_Zones_Health/if.speed.bps[{#SNMPINDEX}])+(last(/SonicWall_SNMP_Interfaces_Zones_Health/if.speed.bps[{#SNMPINDEX}])=0)))*(last(/SonicWall_SNMP_Interfaces_Zones_Health/if.speed.bps[{#SNMPINDEX}])>0)
+        tags:
+        - tag: component
+          value: interface
+        - tag: direction
+          value: ingress
+        - tag: interface
+          value: '{#IFDESCR}'
+      - uuid: e78af1e6bcd54c9a91971b2a97419caa
+        name: 'Interface {#IFDESCR}: Egress utilization'
+        type: CALCULATED
+        key: if.egress.util[{#SNMPINDEX}]
+        delay: 1m
+        value_type: FLOAT
+        units: '%'
+        params: (100*last(/SonicWall_SNMP_Interfaces_Zones_Health/if.egress.bps[{#SNMPINDEX}])/(last(/SonicWall_SNMP_Interfaces_Zones_Health/if.speed.bps[{#SNMPINDEX}])+(last(/SonicWall_SNMP_Interfaces_Zones_Health/if.speed.bps[{#SNMPINDEX}])=0)))*(last(/SonicWall_SNMP_Interfaces_Zones_Health/if.speed.bps[{#SNMPINDEX}])>0)
+        tags:
+        - tag: component
+          value: interface
+        - tag: direction
+          value: egress
+        - tag: interface
+          value: '{#IFDESCR}'
+      trigger_prototypes:
+      - uuid: f2b60cf6c8894a20a2e7d18fd5c599c4
+        name: 'Interface {#IFDESCR}: Link down'
+        expression: last(/SonicWall_SNMP_Interfaces_Zones_Health/if.oper[{#SNMPINDEX}])<>1
+          and last(/SonicWall_SNMP_Interfaces_Zones_Health/if.admin[{#SNMPINDEX}])=1
+        priority: AVERAGE
+      graph_prototypes:
+      - uuid: 15ac9ae8e483474787f39bad6f3f90bf
+        name: 'Interface {#IFDESCR}: Throughput'
+        graph_items:
+        - color: 1A7C11
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.ingress.bps[{#SNMPINDEX}]
+        - color: F63100
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.egress.bps[{#SNMPINDEX}]
+      - uuid: 200c2da4a93244d387a99a720af01104
+        name: 'Interface {#IFDESCR}: Utilization'
+        graph_items:
+        - color: 1A7C11
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.ingress.util[{#SNMPINDEX}]
+        - color: F63100
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.egress.util[{#SNMPINDEX}]
+    - uuid: cfe471e2fef245de9c8620d6f5e79968
+      name: VPN tunnel interface discovery (ifDescr subset)
+      type: SNMP_AGENT
+      key: vpn.if.discovery
+      delay: '{$IFDISCOVERY_DELAY}'
+      lifetime: 30d
+      snmp_oid: discovery[{#IFDESCR},1.3.6.1.2.1.2.2.1.2]
+      filter:
+        conditions:
+        - macro: '{#IFDESCR}'
+          value: .*(VPN|Tunnel|IPSec|VTI).*
+          operator: MATCHES_REGEX
+          formulaid: A
+      trigger_prototypes:
+      - uuid: 6c1ba9f8f0dd4c0abd2b37908dc471d6
+        name: 'VPN Tunnel {#IFDESCR}: DOWN'
+        expression: last(/SonicWall_SNMP_Interfaces_Zones_Health/if.oper[{#SNMPINDEX}])<>1
+          and last(/SonicWall_SNMP_Interfaces_Zones_Health/if.admin[{#SNMPINDEX}])=1
+        priority: HIGH
+        tags:
+        - tag: scope
+          value: vpn
+        - tag: interface
+          value: '{#IFDESCR}'
+      - uuid: 85fa7e7276a3444b9fc758d7dbd552c1
+        name: 'VPN Tunnel {#IFDESCR}: FLAPPING'
+        expression: changecount(/SonicWall_SNMP_Interfaces_Zones_Health/if.oper[{#SNMPINDEX}],10m)>3
+        priority: WARNING
+        tags:
+        - tag: scope
+          value: vpn
+        - tag: interface
+          value: '{#IFDESCR}'
+      graph_prototypes:
+      - uuid: 64a6d8fef2a14b13864ae5805ddec5c3
+        name: 'VPN Tunnel {#IFDESCR}: Traffic'
+        graph_items:
+        - color: 1A7C11
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.ingress.bps[{#SNMPINDEX}]
+        - color: F63100
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.egress.bps[{#SNMPINDEX}]
+      - uuid: ac8f36ef5df942899222739d24564f73
+        name: 'VPN Tunnel {#IFDESCR}: Utilization'
+        graph_items:
+        - color: 1A7C11
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.ingress.util[{#SNMPINDEX}]
+        - color: F63100
+          item:
+            host: SonicWall_SNMP_Interfaces_Zones_Health
+            key: if.egress.util[{#SNMPINDEX}]
+    - uuid: d89ce70262cb4af1a56891d60ce6ce12
+      name: Zone discovery (sonicZoneName)
+      type: SNMP_AGENT
+      key: sonicwall.zone.discovery
+      delay: 1h
+      lifetime: 30d
+      snmp_oid: discovery[{#ZONENAME},1.3.6.1.4.1.8741.1.3.7.1.1.1.1]
+      item_prototypes:
+      - uuid: 54742ccf3ef84d60abe1f707968ac130
+        name: 'Zone {#ZONENAME}: Gateway AV'
+        type: SNMP_AGENT
+        key: zone.gav[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.4.1.8741.1.3.7.1.1.1.8.{#SNMPINDEX}
+        delay: 15m
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: zone
+        - tag: zone
+          value: '{#ZONENAME}'
+      - uuid: fd5b880eba81482eb542f82060ff705c
+        name: 'Zone {#ZONENAME}: Anti-Spyware'
+        type: SNMP_AGENT
+        key: zone.aspy[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.4.1.8741.1.3.7.1.1.1.9.{#SNMPINDEX}
+        delay: 15m
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: zone
+        - tag: zone
+          value: '{#ZONENAME}'
+      - uuid: 1a6c2d2d403a404f848e8decf2f35281
+        name: 'Zone {#ZONENAME}: IPS'
+        type: SNMP_AGENT
+        key: zone.ips[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.4.1.8741.1.3.7.1.1.1.10.{#SNMPINDEX}
+        delay: 15m
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: zone
+        - tag: zone
+          value: '{#ZONENAME}'
+      - uuid: 74de3a8e0d3942978ac89ca43fcbeaa2
+        name: 'Zone {#ZONENAME}: App Control'
+        type: SNMP_AGENT
+        key: zone.appctl[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.4.1.8741.1.3.7.1.1.1.11.{#SNMPINDEX}
+        delay: 15m
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: zone
+        - tag: zone
+          value: '{#ZONENAME}'
+      - uuid: 5f98a1fc0f8c4b0db5df39f356a2bb1c
+        name: 'Zone {#ZONENAME}: SSL Control'
+        type: SNMP_AGENT
+        key: zone.sslctl[{#SNMPINDEX}]
+        snmp_oid: 1.3.6.1.4.1.8741.1.3.7.1.1.1.12.{#SNMPINDEX}
+        delay: 15m
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: zone
+        - tag: zone
+          value: '{#ZONENAME}'
+  triggers:
+  - uuid: 018ab6d1b2c34e49a9a2d00af392b257
+    name: 'System: Device rebooted'
+    expression: change(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.uptime)<0
+    priority: WARNING
+    tags:
+    - tag: scope
+      value: availability
+  - uuid: 7d2a0b43c5a34f7ab6d36771f4691d52
+    name: 'Health: CPU high (warn)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.cpu.pct,10m)>{$CPU_WARN}
+    priority: WARNING
+  - uuid: 4fc1da72fea44ef1a4726bb7f4bca641
+    name: 'Health: CPU high (crit)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.cpu.pct,5m)>{$CPU_CRIT}
+    priority: HIGH
+  - uuid: 9fdda6b4ce6d41e1a15c32ac85a211b5
+    name: 'Health: RAM high (warn)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.ram.pct,10m)>{$RAM_WARN}
+    priority: WARNING
+  - uuid: 63f5b28ccdbf43dcbea11933ca7f744d
+    name: 'Health: RAM high (crit)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.ram.pct,5m)>{$RAM_CRIT}
+    priority: HIGH
+  - uuid: a2b45fa2eefc4cf2ab5d955ea15b4059
+    name: 'Connections: Cache utilization high (warn)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.conn.util.pct,10m)>{$CONN_WARN_PCT}
+    priority: WARNING
+  - uuid: 4208e5ad91c04abcb4639fa8c5cd0e23
+    name: 'Connections: Cache utilization high (crit)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.conn.util.pct,5m)>{$CONN_CRIT_PCT}
+    priority: HIGH
+  - uuid: 0c6a3c37611c4f57a78026bc7d47cb69
+    name: 'DPI-SSL: Conn utilization high (warn)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.dpisll.conn.util.pct,10m)>{$DPISSL_WARN_PCT}
+    priority: WARNING
+  - uuid: e3d92449f89045a2b83b6ef8dbd4f4cf
+    name: 'DPI-SSL: Conn utilization high (crit)'
+    expression: min(/SonicWall_SNMP_Interfaces_Zones_Health/sonicwall.dpisll.conn.util.pct,5m)>{$DPISSL_CRIT_PCT}
+    priority: HIGH

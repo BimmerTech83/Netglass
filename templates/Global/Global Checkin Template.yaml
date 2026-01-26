@@ -1,0 +1,74 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: e4d67505855f4f0dbc8639bc28da7658
+      template: 'Global Checkin SNMP Template'
+      name: 'Global Checkin SNMP Template'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 7e93d9e821154981b965f172c27b1374
+          name: 'Detected Vendor'
+          type: DEPENDENT
+          key: checkin.vendor
+          history: 7d
+          value_type: TEXT
+          inventory_link: VENDOR
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  // Zabbix dependent item preprocessing (JavaScript)
+                  // Input: SNMP sysObjectID value (e.g. "iso.3.6.1.4.1.674.10895.3029" or ".1.3.6.1.4.1.674.10895.3029")
+                  // Output: vendor slug (e.g. "dell")
+                  
+                  var oid = (value || "").trim();
+                  
+                  // Normalize iso.* prefix to numeric .1.* so comparisons are consistent
+                  // "iso.3.6..."  -> ".1.3.6..."
+                  oid = oid.replace(/^iso\./, ".1.");
+                  
+                  // Ensure it begins with a dot (some systems may return "1.3.6..." without leading dot)
+                  if (!oid.startsWith(".")) {
+                    oid = "." + oid;
+                  }
+                  
+                  // Vendor detection by enterprise number (1.3.6.1.4.1.<enterprise>)
+                  if (oid.startsWith(".1.3.6.1.4.1.674"))   return "dell";
+                  if (oid.startsWith(".1.3.6.1.4.1.8741"))  return "sonicwall";
+                  if (oid.startsWith(".1.3.6.1.4.1.9"))     return "cisco";
+                  if (oid.startsWith(".1.3.6.1.4.1.2636"))  return "juniper";
+                  if (oid.startsWith(".1.3.6.1.4.1.25053")) return "ruckus";
+                  if (oid.startsWith(".1.3.6.1.4.1.318"))   return "apc";
+                  if (oid.startsWith(".1.3.6.1.4.1.11"))    return "hp";
+                  
+                  return "unknown";
+          master_item:
+            key: snmp.sysObjectID
+        - uuid: 027c953f0b2f4da294d9a7d3133fa959
+          name: 'SNMP sysDescr'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.1.0
+          key: snmp.sysDescr
+          delay: 10m
+          history: 7d
+          value_type: TEXT
+        - uuid: 09884a1df5574f6baf2ff7d6d917b411
+          name: 'SNMP sysName'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.5.0
+          key: snmp.sysName
+          delay: 10m
+          history: 7d
+          value_type: TEXT
+        - uuid: f2a34682d4294070852b3d8a4fc71539
+          name: 'SNMP sysObjectID'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.2.0
+          key: snmp.sysObjectID
+          delay: 10m
+          history: 7d
+          value_type: TEXT

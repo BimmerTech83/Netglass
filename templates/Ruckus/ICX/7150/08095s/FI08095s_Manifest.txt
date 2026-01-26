@@ -1,0 +1,130 @@
+# Copyright 1996-2014 Ruckus Networks, Inc.
+
+#		All rights reserved.
+
+# Manifest File for FastIron Release 08.0.95s
+
+-FAST_IRON_VER FI08.0.95s
+
+#=========================================================
+
+
+-DIRECTORY /
+md5checksum.txt
+FI08095s_Manifest.txt
+FI08095s_Manifest.sig
+
+-DIRECTORY /ICX7150/Firmware
+icx7xxx_poe_02.2.4.b002.fw
+icx7xxx_poe_02.1.8.b004.fw
+icx7xxx_poe_01.64.20.b001.fw
+
+-DIRECTORY /ICX7150/Images
+SPS08095sufi.bin
+SPR08095sufi.bin
+
+-DIRECTORY /ICX7150/MIBs
+SPS08095s.mib
+SPR08095s.mib
+
+-DIRECTORY /ICX7150/Signatures
+SPS08095sufi.sig
+SPS08095sufinss.sig
+SPR08095sufi.sig
+SPR08095sufinss.sig
+
+-DIRECTORY /ICX7250/Firmware
+icx7xxx_poe_02.1.8.b004.fw
+
+-DIRECTORY /ICX7250/Images
+SPS08095sufi.bin
+SPR08095sufi.bin
+
+-DIRECTORY /ICX7250/MIBs
+SPS08095s.mib
+SPR08095s.mib
+
+-DIRECTORY /ICX7250/Signatures
+SPS08095sufi.sig
+SPS08095sufinss.sig
+SPR08095sufi.sig
+SPR08095sufinss.sig
+
+-DIRECTORY /ICX7450/Firmware
+icx7xxx_poe_02.2.4.b002.fw
+icx7xxx_poe_02.1.8.b004.fw
+
+-DIRECTORY /ICX7450/Images
+SPS08095sufi.bin
+SPR08095sufi.bin
+
+-DIRECTORY /ICX7450/MIBs
+SPS08095s.mib
+SPR08095s.mib
+
+-DIRECTORY /ICX7450/Signatures
+SPS08095sufi.sig
+SPS08095sufinss.sig
+SPR08095sufi.sig
+SPR08095sufinss.sig
+
+-DIRECTORY /ICX7650/Firmware
+icx7xxx_poe_02.2.4.b002.fw
+icx7xxx_poe_02.1.8.b004.fw
+
+-DIRECTORY /ICX7650/Images
+TNS08095sufi.bin
+TNR08095sufi.bin
+
+-DIRECTORY /ICX7650/MIBs
+TNS08095s.mib
+TNR08095s.mib
+
+-DIRECTORY /ICX7650/Signatures
+TNS08095sufi.sig
+TNS08095sufinss.sig
+TNR08095sufi.sig
+TNR08095sufinss.sig
+
+-DIRECTORY /ICX7550/Firmware
+icx7xxx_poe_01.64.20.b001.fw
+
+-DIRECTORY /ICX7550/Images
+GZS08095sufi.bin
+GZR08095sufi.bin
+
+-DIRECTORY /ICX7550/MIBs
+GZS08095s.mib
+GZR08095s.mib
+
+-DIRECTORY /ICX7550/Signatures
+GZS08095sufi.sig
+GZS08095sufinss.sig
+GZR08095sufi.sig
+GZR08095sufinss.sig
+
+-DIRECTORY /ICX7850/Images
+TNR08095sufi.bin
+
+-DIRECTORY /ICX7850/MIBs
+TNR08095s.mib
+
+-DIRECTORY /ICX7850/Signatures
+TNR08095sufi.sig
+TNR08095sufinss.sig
+
+-DIRECTORY /ICX7750/Images
+SWS08095sufi.bin
+SWR08095sufi.bin
+
+-DIRECTORY /ICX7750/MIBs
+SWS08095s.mib
+SWR08095s.mib
+
+-DIRECTORY /ICX7750/Signatures
+SWS08095sufi.sig
+SWS08095sufinss.sig
+SWR08095sufi.sig
+SWR08095sufinss.sig
+
+-END_OF_IMAGES
