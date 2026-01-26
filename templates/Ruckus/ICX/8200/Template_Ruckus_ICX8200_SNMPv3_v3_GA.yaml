@@ -1,0 +1,891 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+  - uuid: f87b7838d8c14f86b3dd58b37d1a6095
+    name: Templates/Network devices
+  templates:
+  - uuid: 8bd50ca8aa1b4bf08b2b2fe43d46018f
+    template: ruckus.icx8200.snmpv3
+    name: Ruckus ICX 8200 SNMPv3 (Interfaces + STP + PoE/Stack Traps)
+    description: 'MSP-grade SNMPv3 template for Ruckus ICX 8200 series (FastIron 10.x).
+
+
+      Includes:
+
+      - Interface LLD (physical ports) + link/health items
+
+      - Interface LLD (operUp only) + throughput items/graphs
+
+      - STP global health + per-bridge-port STP state (BRIDGE-MIB) and correlation triggers
+
+      - Optional SNMP trap items for select Foundry/Ruckus enterprise traps (e.g., MAC move rate)
+
+
+      Notes:
+
+      - Configure SNMPv3 credentials on the host interface (or inherited via macros in your environment).
+
+      - This template intentionally avoids frequent polling of very large tables to reduce switch CPU load.'
+    vendor:
+      name: STACKTECH
+      version: 1.3.2-GA
+    groups:
+    - name: Templates/Network devices
+    macros:
+    - macro: '{$IF.ERRORS.WARN}'
+      value: '10'
+      description: Warn if errors+discards increase by this many over 5m.
+    - macro: '{$IF.FLAP.COUNT}'
+      value: '2'
+      description: OperStatus changes in 3m to consider flapping.
+    - macro: '{$STP.TOPO.WARN}'
+      value: '1'
+      description: Warn if topology change counter changes within 5m.
+    - macro: '{$STP.TOPO.HIGH}'
+      value: '3'
+      description: High if topology changes >= this within 15m.
+    - macro: '{$POE.BUDGET.WARN}'
+      value: '85'
+      description: Warn if PoE consumption >= this % of budget.
+    - macro: '{$POE.BUDGET.HIGH}'
+      value: '95'
+      description: High if PoE consumption >= this % of budget.
+    - macro: '{$LLDP.CHANGE.WARN}'
+      value: '1'
+      description: Warn if LLDP neighbor identity changes within 10m.
+    - macro: '{$LACP.DEGRADED.MEMBERS}'
+      value: '1'
+      description: Warn if active LACP members <= this value.
+    - macro: '{$CPU.UTIL.WARN}'
+      value: '75'
+      description: Warn when 1m CPU utilization exceeds this value.
+    - macro: '{$CPU.UTIL.HIGH}'
+      value: '90'
+      description: High when 1m CPU utilization exceeds this value.
+    - macro: '{$IF.UTIL.WARN}'
+      value: '80'
+      description: Warn if interface utilization >= this % (5m avg).
+    - macro: '{$IF.UTIL.HIGH}'
+      value: '95'
+      description: High if interface utilization >= this % (5m avg).
+    items:
+    - uuid: 2e711ec7e4a6495dad70eb08f3c44821
+      name: System name
+      type: SNMP_AGENT
+      key: sysName.0
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      history: 7d
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: system
+    - uuid: c5d59e24f4ab4c62b0da8832cea789a6
+      name: System description
+      type: SNMP_AGENT
+      key: sysDescr.0
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      history: 90d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: system
+    - uuid: ef73b29b16f248a7b3678a43ef73b814
+      name: Uptime (seconds)
+      type: SNMP_AGENT
+      key: sysUpTimeSeconds
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      history: 30d
+      value_type: UNSIGNED
+      units: s
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: cc9576104203435cbffcf039bcc2ea94
+      name: SNMP sysLocation
+      type: SNMP_AGENT
+      snmp_oid: .1.3.6.1.2.1.1.6.0
+      key: snmp.sysLocation
+      delay: 10m
+      history: 30d
+      trends: '0'
+      value_type: TEXT
+      inventory_link: LOCATION
+      tags:
+      - tag: component
+        value: system
+    - uuid: 144949bf89d94219884e0662899f8784
+      name: SNMP sysContact
+      type: SNMP_AGENT
+      snmp_oid: .1.3.6.1.2.1.1.4.0
+      key: snmp.sysContact
+      delay: 10m
+      history: 30d
+      trends: '0'
+      value_type: TEXT
+      inventory_link: CONTACT
+      tags:
+      - tag: component
+        value: system
+    - uuid: 7ffcc320e03544e7ad1299a19d1a991f
+      name: 'STP: Topology changes (dot1dStpTopChanges)'
+      type: SNMP_AGENT
+      key: stp.topchanges
+      snmp_oid: 1.3.6.1.2.1.17.2.4.0
+      history: 30d
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: stp
+    - uuid: 46ae76da7c1549d48e2fcedecb184bf4
+      name: 'STP: Time since topology change (seconds)'
+      type: SNMP_AGENT
+      key: stp.time_since_topo_change
+      snmp_oid: 1.3.6.1.2.1.17.2.3.0
+      history: 30d
+      value_type: UNSIGNED
+      units: s
+      tags:
+      - tag: component
+        value: stp
+    - uuid: 43720857dba942569ed7c2bcf230604f
+      name: 'STP: Designated root (dot1dStpDesignatedRoot)'
+      type: SNMP_AGENT
+      key: stp.designated_root
+      snmp_oid: 1.3.6.1.2.1.17.2.5.0
+      history: 30d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: stp
+    - uuid: 4d6cdd8a1b52447eba7e4b88c921c070
+      name: 'STP: Root port (dot1dStpRootPort)'
+      type: SNMP_AGENT
+      key: stp.root_port
+      snmp_oid: 1.3.6.1.2.1.17.2.7.0
+      history: 30d
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: stp
+    - uuid: b4b1696ec5e34046b2e99d69d3df30a3
+      name: 'STP: Root path cost (dot1dStpRootCost)'
+      type: SNMP_AGENT
+      key: stp.root_cost
+      snmp_oid: 1.3.6.1.2.1.17.2.8.0
+      history: 30d
+      value_type: UNSIGNED
+      tags:
+      - tag: component
+        value: stp
+    - uuid: d007ea23352f438f80f71b234fcfd2ef
+      name: 'CPU: Utilization (1m)'
+      type: SNMP_AGENT
+      key: cpu.util.1m
+      snmp_oid: 1.3.6.1.4.1.1991.1.1.1.1.6.0
+      delay: 1m
+      history: 7d
+      value_type: UNSIGNED
+      units: '%'
+      tags:
+      - tag: component
+        value: cpu
+    - uuid: b1aa1614f49f42329d6a15e151e4612d
+      name: 'SNMP trap: Ruckus/Foundry (fallback)'
+      type: SNMP_TRAP
+      key: snmptrap.fallback
+      history: 7d
+      trends: '0'
+      value_type: LOG
+      tags:
+      - tag: component
+        value: snmptrap
+    - uuid: 92e9a21d29bd410eb87dae5779335680
+      name: 'SNMP trap: MAC move threshold-rate (1.3.6.1.4.1.1991.0.197)'
+      type: SNMP_TRAP
+      key: snmptrap[1.3.6.1.4.1.1991.0.197]
+      history: 30d
+      trends: '0'
+      value_type: LOG
+      tags:
+      - tag: component
+        value: snmptrap
+      - tag: cause
+        value: mac-move
+    - uuid: f0280632613249ca811ffca165f17a00
+      name: 'SNMP trap: MAC move interval-history (1.3.6.1.4.1.1991.0.198)'
+      type: SNMP_TRAP
+      key: snmptrap[1.3.6.1.4.1.1991.0.198]
+      history: 30d
+      trends: '0'
+      value_type: LOG
+      tags:
+      - tag: component
+        value: snmptrap
+      - tag: cause
+        value: mac-move
+    - uuid: 84a12190b97d4a99a33618f058715cf6
+      name: 'PoE: Total power available (mW) [POWER-ETHERNET-MIB]'
+      type: SNMP_AGENT
+      key: poe.total.mw
+      snmp_oid: 1.3.6.1.2.1.105.1.3.1.1.2.1
+      history: 30d
+      value_type: UNSIGNED
+      units: mW
+      tags:
+      - tag: component
+        value: poe
+    - uuid: 634454752af04dc485e046d75331f8f5
+      name: 'PoE: Total power used (mW) [POWER-ETHERNET-MIB]'
+      type: SNMP_AGENT
+      key: poe.used.mw
+      snmp_oid: 1.3.6.1.2.1.105.1.3.1.1.4.1
+      history: 30d
+      value_type: UNSIGNED
+      units: mW
+      tags:
+      - tag: component
+        value: poe
+    - uuid: 8245c876246342bd8b564a3feda705a4
+      name: 'PoE: Power utilization (%)'
+      type: CALCULATED
+      key: poe.util.pct
+      params: 100*last(//poe.used.mw)/(last(//poe.total.mw)+(last(//poe.total.mw)=0))
+      history: 30d
+      value_type: FLOAT
+      units: '%'
+      tags:
+      - tag: component
+        value: poe
+    discovery_rules:
+    - uuid: 2711783debc8463bbc118e20fec40d00
+      name: Interface discovery (physical ports)
+      type: SNMP_AGENT
+      key: if.phys.discovery
+      snmp_oid: discovery[{#IFINDEX},1.3.6.1.2.1.2.2.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#IFTYPE},1.3.6.1.2.1.2.2.1.3,{#IFADMIN},1.3.6.1.2.1.2.2.1.7,{#IFOPER},1.3.6.1.2.1.2.2.1.8,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18]
+      filter:
+        evaltype: AND
+        conditions:
+        - macro: '{#IFTYPE}'
+          value: ^6$
+          operator: MATCHES_REGEX
+        - macro: '{#IFDESCR}'
+          value: ^(Vlan|Loopback|Tunnel|Null|Port-channel)
+          operator: NOT_MATCHES_REGEX
+      item_prototypes:
+      - uuid: 2f81705fd9b745e793b4b8eef5efd7b7
+        name: '{#IFNAME} [{#IFALIAS}]: Admin status'
+        type: SNMP_AGENT
+        key: if.admin[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.7.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 95b9e252938f44738a9a92f9cc9cc876
+        name: '{#IFNAME} [{#IFALIAS}]: Oper status'
+        type: SNMP_AGENT
+        key: if.oper[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.8.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: ba5ab173a64945f09f83fee4cfe74438
+        name: '{#IFNAME} [{#IFALIAS}]: Description'
+        type: SNMP_AGENT
+        key: if.alias[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.31.1.1.1.18.{#IFINDEX}
+        history: 90d
+        trends: '0'
+        value_type: TEXT
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: ed7588891a3244a9a55d924ff5bd412d
+        name: '{#IFNAME} [{#IFALIAS}]: Speed'
+        type: SNMP_AGENT
+        key: if.speed[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.31.1.1.1.15.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        units: bps
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 22dead1e24f3431c924e61b5c46ae564
+        name: '{#IFNAME} [{#IFALIAS}]: In errors'
+        type: SNMP_AGENT
+        key: if.in.errors[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.14.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: ec6f467c1b504768918830a45078b862
+        name: '{#IFNAME} [{#IFALIAS}]: Out errors'
+        type: SNMP_AGENT
+        key: if.out.errors[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.20.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 9cdbb9b889534f6282ca72280d605437
+        name: '{#IFNAME} [{#IFALIAS}]: In discards'
+        type: SNMP_AGENT
+        key: if.in.discards[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.13.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 4581bc5fa497487c811f6ea409bafdf4
+        name: '{#IFNAME} [{#IFALIAS}]: Out discards'
+        type: SNMP_AGENT
+        key: if.out.discards[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.2.2.1.19.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      trigger_prototypes:
+      - uuid: 46018c5e1db342a790ffbf80830c9a5b
+        name: '{#IFNAME} [{#IFALIAS}]: Link down (admin up)'
+        expression: last(/ruckus.icx8200.snmpv3/if.oper[{#IFINDEX}])=2 and last(/ruckus.icx8200.snmpv3/if.admin[{#IFINDEX}])=1
+        priority: AVERAGE
+        tags:
+        - tag: component
+          value: interface
+        - tag: cause
+          value: link
+      - uuid: 142687dcfad2475b9657c34f258e4ee9
+        name: '{#IFNAME} [{#IFALIAS}]: Port flapping (oper status)'
+        expression: changecount(/ruckus.icx8200.snmpv3/if.oper[{#IFINDEX}],3m)>={$IF.FLAP.COUNT}
+        priority: WARNING
+        tags:
+        - tag: component
+          value: interface
+        - tag: cause
+          value: flap
+      - uuid: e98967c3e823476d94b93798157abe5a
+        name: '{#IFNAME} [{#IFALIAS}]: Errors/discards increasing (last 5m)'
+        expression: ((last(/ruckus.icx8200.snmpv3/if.in.errors[{#IFINDEX}])-min(/ruckus.icx8200.snmpv3/if.in.errors[{#IFINDEX}],5m))+(last(/ruckus.icx8200.snmpv3/if.out.errors[{#IFINDEX}])-min(/ruckus.icx8200.snmpv3/if.out.errors[{#IFINDEX}],5m))+(last(/ruckus.icx8200.snmpv3/if.in.discards[{#IFINDEX}])-min(/ruckus.icx8200.snmpv3/if.in.discards[{#IFINDEX}],5m))+(last(/ruckus.icx8200.snmpv3/if.out.discards[{#IFINDEX}])-min(/ruckus.icx8200.snmpv3/if.out.discards[{#IFINDEX}],5m)))>={$IF.ERRORS.WARN}
+        priority: WARNING
+        tags:
+        - tag: component
+          value: interface
+        - tag: cause
+          value: errors
+      - uuid: 7fc158aed9a24a8ea1b469ca8cb74155
+        name: '{#IFNAME} [{#IFALIAS}]: Flapping likely due to STP (last 3m)'
+        expression: changecount(/ruckus.icx8200.snmpv3/if.oper[{#IFINDEX}],3m)>={$IF.FLAP.COUNT} and changecount(/ruckus.icx8200.snmpv3/stp.topchanges,3m)>0
+          and last(/ruckus.icx8200.snmpv3/if.admin[{#IFINDEX}])=1
+        priority: HIGH
+        tags:
+        - tag: component
+          value: interface
+        - tag: cause
+          value: stp
+        - tag: layer
+          value: l2
+    - uuid: 983a8c6ecf844677b5d4a2cf50c9fd72
+      name: 'Interface discovery (operUp ports: throughput)'
+      type: SNMP_AGENT
+      key: if.up.discovery
+      snmp_oid: discovery[{#IFINDEX},1.3.6.1.2.1.2.2.1.1,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#IFTYPE},1.3.6.1.2.1.2.2.1.3,{#IFOPER},1.3.6.1.2.1.2.2.1.8]
+      filter:
+        evaltype: AND
+        conditions:
+        - macro: '{#IFTYPE}'
+          value: ^6$
+          operator: MATCHES_REGEX
+        - macro: '{#IFOPER}'
+          value: ^1$
+          operator: MATCHES_REGEX
+        - macro: '{#IFDESCR}'
+          value: ^(Vlan|Loopback|Tunnel|Null|Port-channel)
+          operator: NOT_MATCHES_REGEX
+      item_prototypes:
+      - uuid: 8dcb0c63054044c59715f7c58aa88cdc
+        name: '{#IFNAME} [{#IFALIAS}]: Inbound traffic'
+        type: SNMP_AGENT
+        key: if.in.bps[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.31.1.1.1.6.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        units: bps
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+          parameters: []
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: traffic
+        - tag: direction
+          value: in
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: b2bebba9f200498b9eee695ac7df106a
+        name: '{#IFNAME} [{#IFALIAS}]: Outbound traffic'
+        type: SNMP_AGENT
+        key: if.out.bps[{#IFINDEX}]
+        snmp_oid: 1.3.6.1.2.1.31.1.1.1.10.{#IFINDEX}
+        history: 30d
+        value_type: UNSIGNED
+        units: bps
+        preprocessing:
+        - type: CHANGE_PER_SECOND
+          parameters: []
+        - type: MULTIPLIER
+          parameters:
+          - '8'
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: traffic
+        - tag: direction
+          value: out
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 04f55e9a855446b1bf6ca433cc4ee164
+        name: '{#IFNAME} [{#IFALIAS}]: Oper status (cached)'
+        type: CALCULATED
+        key: if.up.oper[{#IFINDEX}]
+        params: last(//if.oper[{#IFINDEX}])
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: interface
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 243197c7bf5148d5aad70515ab45a2af
+        name: '{#IFNAME} [{#IFALIAS}]: Inbound utilization (%)'
+        type: CALCULATED
+        key: if.in.util[{#IFINDEX}]
+        params: 100*last(//if.in.bps[{#IFINDEX}])/(last(//if.speed[{#IFINDEX}])+(last(//if.speed[{#IFINDEX}])=0))
+        history: 7d
+        value_type: FLOAT
+        units: '%'
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: utilization
+        - tag: direction
+          value: in
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 3ac34afce81a43c9afa64e172c1e73db
+        name: '{#IFNAME} [{#IFALIAS}]: Outbound utilization (%)'
+        type: CALCULATED
+        key: if.out.util[{#IFINDEX}]
+        params: 100*last(//if.out.bps[{#IFINDEX}])/(last(//if.speed[{#IFINDEX}])+(last(//if.speed[{#IFINDEX}])=0))
+        history: 7d
+        value_type: FLOAT
+        units: '%'
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: utilization
+        - tag: direction
+          value: out
+        - tag: ifname
+          value: '{#IFNAME}'
+      graph_prototypes:
+      - uuid: 9401fedf42cb4fdc94f1be0c0aa0a106
+        name: '{#IFNAME} [{#IFALIAS}]: Throughput'
+        graph_items:
+        - color: 00AA00
+          item:
+            host: ruckus.icx8200.snmpv3
+            key: if.in.bps[{#IFINDEX}]
+        - color: AA0000
+          item:
+            host: ruckus.icx8200.snmpv3
+            key: if.out.bps[{#IFINDEX}]
+      trigger_prototypes:
+      - uuid: 35bbbfe389ea42babcaa9ebe26cf8b9e
+        name: '{#IFNAME} [{#IFALIAS}]: Inbound utilization warning (5m)'
+        expression: max(/ruckus.icx8200.snmpv3/if.in.util[{#IFINDEX}],5m)>={$IF.UTIL.WARN} and last(/ruckus.icx8200.snmpv3/if.up.oper[{#IFINDEX}])=1
+        priority: WARNING
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: utilization
+        - tag: direction
+          value: in
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 4b7aaaba4e254875b3ef664671cf9ce7
+        name: '{#IFNAME} [{#IFALIAS}]: Inbound utilization high (5m)'
+        expression: max(/ruckus.icx8200.snmpv3/if.in.util[{#IFINDEX}],5m)>={$IF.UTIL.HIGH} and last(/ruckus.icx8200.snmpv3/if.up.oper[{#IFINDEX}])=1
+        priority: HIGH
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: utilization
+        - tag: direction
+          value: in
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 1ba48c4a812b49c1abca9521971224a6
+        name: '{#IFNAME} [{#IFALIAS}]: Outbound utilization warning (5m)'
+        expression: max(/ruckus.icx8200.snmpv3/if.out.util[{#IFINDEX}],5m)>={$IF.UTIL.WARN} and last(/ruckus.icx8200.snmpv3/if.up.oper[{#IFINDEX}])=1
+        priority: WARNING
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: utilization
+        - tag: direction
+          value: out
+        - tag: ifname
+          value: '{#IFNAME}'
+      - uuid: 10ee6340535f46c6802fd71aae411578
+        name: '{#IFNAME} [{#IFALIAS}]: Outbound utilization high (5m)'
+        expression: max(/ruckus.icx8200.snmpv3/if.out.util[{#IFINDEX}],5m)>={$IF.UTIL.HIGH} and last(/ruckus.icx8200.snmpv3/if.up.oper[{#IFINDEX}])=1
+        priority: HIGH
+        tags:
+        - tag: component
+          value: interface
+        - tag: metric
+          value: utilization
+        - tag: direction
+          value: out
+        - tag: ifname
+          value: '{#IFNAME}'
+    - uuid: e9b03d5fa26c4c5daa1f6996de0a20aa
+      name: STP bridge-port discovery (dot1dBasePortIfIndex)
+      type: SNMP_AGENT
+      key: stp.brport.discovery
+      snmp_oid: discovery[{#BRPORT},1.3.6.1.2.1.17.1.4.1.1,{#IFINDEX},1.3.6.1.2.1.17.1.4.1.2]
+      item_prototypes:
+      - uuid: 75df5d6b06d84879a2f6cba3714aedd1
+        name: 'STP: Bridge port {#BRPORT} -> ifIndex'
+        type: SNMP_AGENT
+        key: stp.brport.ifindex[{#BRPORT}]
+        snmp_oid: 1.3.6.1.2.1.17.1.4.1.2.{#BRPORT}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: stp
+      - uuid: 00e9711e3093453bb39cd502d2fcbe00
+        name: 'STP: Port state (bridge port {#BRPORT})'
+        type: SNMP_AGENT
+        key: stp.port.state[{#BRPORT}]
+        snmp_oid: 1.3.6.1.2.1.17.2.15.1.3.{#BRPORT}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: stp
+      - uuid: 31353c755e91497a863e8301a27e97af
+        name: 'STP: Port enable (bridge port {#BRPORT})'
+        type: SNMP_AGENT
+        key: stp.port.enable[{#BRPORT}]
+        snmp_oid: 1.3.6.1.2.1.17.2.15.1.4.{#BRPORT}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: stp
+      - uuid: c6afaccd89e84b87a599230442309538
+        name: 'STP: Port path cost (bridge port {#BRPORT})'
+        type: SNMP_AGENT
+        key: stp.port.path_cost[{#BRPORT}]
+        snmp_oid: 1.3.6.1.2.1.17.2.15.1.5.{#BRPORT}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: stp
+      trigger_prototypes:
+      - uuid: 5346ac0e84e5424aa60f9d2690000c14
+        name: 'STP: Port state changed frequently (bridge port {#BRPORT})'
+        expression: changecount(/ruckus.icx8200.snmpv3/stp.port.state[{#BRPORT}],5m)>2
+        priority: WARNING
+        tags:
+        - tag: cause
+          value: stp
+        - tag: layer
+          value: l2
+    - uuid: c747622160c24d52a7246ae1306bcc2c
+      name: PoE port discovery (pethPsePortTable)
+      type: SNMP_AGENT
+      key: poe.port.discovery
+      snmp_oid: discovery[{#POEPORT},1.3.6.1.2.1.105.1.1.1.1.1,{#IFINDEX},1.3.6.1.2.1.105.1.1.1.1.3]
+      item_prototypes:
+      - uuid: 832d9a5404a742e2a05c3a43d44a70ab
+        name: 'PoE ifIndex {#IFINDEX}: Admin enable'
+        type: SNMP_AGENT
+        key: poe.port.admin[{#POEPORT}]
+        snmp_oid: 1.3.6.1.2.1.105.1.1.1.1.4.{#POEPORT}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: poe
+      - uuid: 04a739e6567f44aa87ee8f7db58b26fb
+        name: 'PoE ifIndex {#IFINDEX}: Power draw (mW)'
+        type: SNMP_AGENT
+        key: poe.port.mw[{#POEPORT}]
+        snmp_oid: 1.3.6.1.2.1.105.1.1.1.1.7.{#POEPORT}
+        history: 30d
+        value_type: UNSIGNED
+        units: mW
+        tags:
+        - tag: component
+          value: poe
+      - uuid: ce1b5df95d484c2292acbe7f368237ec
+        name: 'PoE ifIndex {#IFINDEX}: Detection status'
+        type: SNMP_AGENT
+        key: poe.port.detect[{#POEPORT}]
+        snmp_oid: 1.3.6.1.2.1.105.1.1.1.1.6.{#POEPORT}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: poe
+      trigger_prototypes:
+      - uuid: 01015ad8852744eba09a382d8478b22f
+        name: 'PoE ifIndex {#IFINDEX}: Power draw high (>= 25W)'
+        expression: last(/ruckus.icx8200.snmpv3/poe.port.mw[{#POEPORT}])>=25000
+        priority: WARNING
+        tags:
+        - tag: component
+          value: poe
+    - uuid: d5d6dcc07c3d4ab594452b155adbbd22
+      name: LLDP neighbor discovery (lldpRemTable)
+      type: SNMP_AGENT
+      key: lldp.rem.discovery
+      snmp_oid: discovery[{#LLDPTM},1.0.8802.1.1.2.1.4.1.1.1,{#LLDPLPORT},1.0.8802.1.1.2.1.4.1.1.2,{#LLDPREMIDX},1.0.8802.1.1.2.1.4.1.1.3,{#REMSYSNAME},1.0.8802.1.1.2.1.4.1.1.9,{#REMPORTID},1.0.8802.1.1.2.1.4.1.1.7]
+      item_prototypes:
+      - uuid: c5bdbaf8094b46c7ab53146c6998cfa7
+        name: 'LLDP localPort {#LLDPLPORT}: Remote system name [{#LLDPREMIDX}]'
+        type: SNMP_AGENT
+        key: lldp.rem.sysname[{#LLDPLPORT},{#LLDPREMIDX}]
+        snmp_oid: 1.0.8802.1.1.2.1.4.1.1.9.{#LLDPTM}.{#LLDPLPORT}.{#LLDPREMIDX}
+        history: 30d
+        trends: '0'
+        value_type: TEXT
+        tags:
+        - tag: component
+          value: lldp
+      - uuid: d261ce0c4b754b5b963595a7f3f8ad20
+        name: 'LLDP localPort {#LLDPLPORT}: Remote port id [{#LLDPREMIDX}]'
+        type: SNMP_AGENT
+        key: lldp.rem.portid[{#LLDPLPORT},{#LLDPREMIDX}]
+        snmp_oid: 1.0.8802.1.1.2.1.4.1.1.7.{#LLDPTM}.{#LLDPLPORT}.{#LLDPREMIDX}
+        history: 30d
+        trends: '0'
+        value_type: TEXT
+        tags:
+        - tag: component
+          value: lldp
+      trigger_prototypes:
+      - uuid: 263367190203455fbd1a08178b65a59d
+        name: 'LLDP localPort {#LLDPLPORT}: Neighbor changed (10m)'
+        expression: changecount(/ruckus.icx8200.snmpv3/lldp.rem.sysname[{#LLDPLPORT},{#LLDPREMIDX}],10m)>={$LLDP.CHANGE.WARN}
+        priority: WARNING
+        tags:
+        - tag: component
+          value: lldp
+        - tag: cause
+          value: topology
+    - uuid: f82aa65313394a61ac21beca2f91acdf
+      name: LACP aggregate discovery (dot3adAggTable)
+      type: SNMP_AGENT
+      key: lacp.agg.discovery
+      snmp_oid: discovery[{#LAG},1.2.840.10006.300.43.1.1.1.1.1,{#LAGNAME},1.2.840.10006.300.43.1.1.1.1.2]
+      item_prototypes:
+      - uuid: d2ac293397a64dc8b55e9452e46cd163
+        name: 'LACP {#LAGNAME}: Attached ports'
+        type: SNMP_AGENT
+        key: lacp.agg.attached[{#LAG}]
+        snmp_oid: 1.2.840.10006.300.43.1.1.1.1.8.{#LAG}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: lacp
+      - uuid: 14b218d5cece4efc8f18a245fe3b6d43
+        name: 'LACP {#LAGNAME}: Operational ports'
+        type: SNMP_AGENT
+        key: lacp.agg.oper[{#LAG}]
+        snmp_oid: 1.2.840.10006.300.43.1.1.1.1.9.{#LAG}
+        history: 30d
+        value_type: UNSIGNED
+        tags:
+        - tag: component
+          value: lacp
+      trigger_prototypes:
+      - uuid: b5a1b95e8fff4f36bf18b94d7bfb8981
+        name: 'LACP {#LAGNAME}: Degraded (oper ports low)'
+        expression: last(/ruckus.icx8200.snmpv3/lacp.agg.oper[{#LAG}])<={$LACP.DEGRADED.MEMBERS} and last(/ruckus.icx8200.snmpv3/lacp.agg.attached[{#LAG}])>last(/ruckus.icx8200.snmpv3/lacp.agg.oper[{#LAG}])
+        priority: AVERAGE
+        tags:
+        - tag: component
+          value: lacp
+        - tag: impact
+          value: capacity
+    - uuid: a40bbd8e61d64feca1a6a6fb12322ebf
+      name: ENTITY-MIB discovery (chassis)
+      type: SNMP_AGENT
+      key: entity.chassis.discovery
+      snmp_oid: discovery[{#ENTINDEX},1.3.6.1.2.1.47.1.1.1.1.1,{#ENTCLASS},1.3.6.1.2.1.47.1.1.1.1.5,{#ENTNAME},1.3.6.1.2.1.47.1.1.1.1.7,{#ENTSERIAL},1.3.6.1.2.1.47.1.1.1.1.11]
+      filter:
+        evaltype: AND
+        conditions:
+        - macro: '{#ENTCLASS}'
+          value: ^3$
+          operator: MATCHES_REGEX
+      item_prototypes:
+      - uuid: 5302ed2fc8d944a8ac474deccdcd32bc
+        name: 'Entity {#ENTNAME}: Serial number'
+        type: SNMP_AGENT
+        key: entity.serial.chassis[{#ENTINDEX}]
+        snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.11.{#ENTINDEX}
+        history: 90d
+        trends: '0'
+        value_type: TEXT
+        tags:
+        - tag: component
+          value: inventory
+        - tag: entity
+          value: '{#ENTNAME}'
+        - tag: entity_class
+          value: chassis
+    - uuid: dd04ecbd5c3b4afda8026b02add64cac
+      name: ENTITY-MIB discovery (power supplies)
+      type: SNMP_AGENT
+      key: entity.psu.discovery
+      snmp_oid: discovery[{#ENTINDEX},1.3.6.1.2.1.47.1.1.1.1.1,{#ENTCLASS},1.3.6.1.2.1.47.1.1.1.1.5,{#ENTNAME},1.3.6.1.2.1.47.1.1.1.1.7,{#ENTSERIAL},1.3.6.1.2.1.47.1.1.1.1.11]
+      filter:
+        evaltype: AND
+        conditions:
+        - macro: '{#ENTCLASS}'
+          value: ^6$
+          operator: MATCHES_REGEX
+      item_prototypes:
+      - uuid: dce9c06b16e74daf8e1faff714d5317f
+        name: 'Entity {#ENTNAME}: Serial number'
+        type: SNMP_AGENT
+        key: entity.serial.psu[{#ENTINDEX}]
+        snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.11.{#ENTINDEX}
+        history: 90d
+        trends: '0'
+        value_type: TEXT
+        tags:
+        - tag: component
+          value: inventory
+        - tag: entity
+          value: '{#ENTNAME}'
+        - tag: entity_class
+          value: powerSupply
+  triggers:
+  - uuid: d1e8e5ac285d4315973fe66693df1b00
+    name: 'CPU: Utilization warning (1m)'
+    expression: last(/ruckus.icx8200.snmpv3/cpu.util.1m)>={$CPU.UTIL.WARN} and last(/ruckus.icx8200.snmpv3/cpu.util.1m)<{$CPU.UTIL.HIGH}
+    priority: WARNING
+    tags:
+    - tag: component
+      value: cpu
+  - uuid: 0151692b47e3477d853bc5a5e9265c2d
+    name: 'CPU: Utilization high (1m)'
+    expression: last(/ruckus.icx8200.snmpv3/cpu.util.1m)>={$CPU.UTIL.HIGH}
+    priority: HIGH
+    tags:
+    - tag: component
+      value: cpu
+  - uuid: c6ae1faaa6bf43ee9eb4403750c162f0
+    name: 'STP: Topology change detected (last 5m)'
+    expression: changecount(/ruckus.icx8200.snmpv3/stp.topchanges,5m)>={$STP.TOPO.WARN}
+    priority: WARNING
+    tags:
+    - tag: cause
+      value: stp
+    - tag: layer
+      value: l2
+  - uuid: 8f35641ba0cf46b9a6bae912ded88c85
+    name: 'STP: Excessive topology changes (last 15m)'
+    expression: changecount(/ruckus.icx8200.snmpv3/stp.topchanges,15m)>={$STP.TOPO.HIGH}
+    priority: HIGH
+    tags:
+    - tag: cause
+      value: stp
+    - tag: layer
+      value: l2
+  - uuid: c969ea09269d41c0a524a4421ded76d7
+    name: 'STP: Root bridge changed (last 5m)'
+    expression: changecount(/ruckus.icx8200.snmpv3/stp.designated_root,5m)>0
+    priority: HIGH
+    tags:
+    - tag: cause
+      value: stp
+    - tag: layer
+      value: l2
+  - uuid: 41b9e6f62414409e926e697c645a2d48
+    name: 'MAC move: threshold-rate trap received'
+    expression: nodata(/ruckus.icx8200.snmpv3/snmptrap[1.3.6.1.4.1.1991.0.197],1h)=0
+    priority: WARNING
+    tags:
+    - tag: cause
+      value: mac-move
+    - tag: layer
+      value: l2
+  - uuid: c2024495c4e746cab3afd8746a276c64
+    name: 'PoE: Budget utilization high'
+    expression: last(/ruckus.icx8200.snmpv3/poe.util.pct)>={$POE.BUDGET.HIGH}
+    priority: HIGH
+    tags:
+    - tag: component
+      value: poe
+    - tag: impact
+      value: capacity
+  - uuid: 01d072c0d9c84a71bb98ee1d899ec4a4
+    name: 'PoE: Budget utilization warning'
+    expression: last(/ruckus.icx8200.snmpv3/poe.util.pct)>={$POE.BUDGET.WARN}
+    priority: WARNING
+    tags:
+    - tag: component
+      value: poe
+    - tag: impact
+      value: capacity
